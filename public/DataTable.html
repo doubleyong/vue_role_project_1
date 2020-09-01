@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>学生列表 </h1>
+<!--搜索-->
+<form id="frmSearch">
+    用户名: <input type="text" id="txtSearchUser">
+    性别:
+    <select name="selSex" id="selSex">
+        <option value="-1">全部</option>
+    <option value="1">男</option>
+    <option value="0">女</option>
+    </select>
+    <button type="button" id="btnSearch">搜索</button>
+</form>
+<table>
+    <thead>
+    <tr>
+        <th>姓名</th>
+        <th>性别</th>
+        <th>密码</th>
+        <th>地址</th>
+        <th>操作</th>
+    </tr>
+    </thead>
+    <tbody id="tbStudent">
+
+    </tbody>
+</table>
+
+<div id="divPage"></div>
+<script src="js/jquery.js"></script>
+<script type="text/javascript">
+    // ready : dom加载完成
+    // onload:所有加载完成
+    var currentPage = 1; //当前的页码
+    var pageSize = 3; //每页显示的数据
+    var total ; //总数量
+    var totalPage; // 总页数;
+    $(function(){
+        // 获取指定的学生数据
+        getStudentByPage();
+        // 获取学生的总数量
+        getStudentTotal();
+    })
+
+    $("#btnSearch").click(function(){
+        let username = $("#txtSearchUser").val().trim();
+        let sex = $("#selSex").val();
+        console.log(sex);
+        //将用户 的输入传入后台，根据这个进行查询，并返回查询结果
+        $.get("/user/search",{username:username,sex:sex},function(data){
+            console.log(data);
+            displayStudentList(data);
+        });
+    })
+    $("#divPage").on("click","button",function(e){
+       var button = e.target; //谁被点击
+        console.log(button);
+        currentPage = button.innerText;
+        getStudentByPage();//根据对应的页码，查找数据
+    })
+    function getStudentTotal(){
+        $.get("/user/total.do",function(data){
+            console.log(data);
+            total = data[0].num;
+            totalPage = Math.ceil(total/pageSize);
+            for(var i=1;i<=totalPage;i++){
+                $("#divPage").append("<button>"+i+"</button>")
+            }
+        })
+    }
+    function getStudentByPage(){
+        $.get(
+            "/user/list.do",
+            {currentPage:currentPage,pageSize:pageSize}
+            ,(result)=>{
+                console.log(typeof result);
+                console.log(result);
+                displayStudentList(result);
+            }
+        )
+    }
+    function displayStudentList(result){
+        if(result.code==200){
+            //result.data
+            $("#tbStudent").html("");
+            for(var i=0;i<result.data.length;i++){
+                $("#tbStudent").append(`<tr>
+                            <td>${result.data[i].StudentName}</td>
+                            <td>${result.data[i].Sex==1?"男":"女"}</td>
+                            <td>${result.data[i].LoginPwd}</td>
+                            <td>${result.data[i].Address}</td>
+                            <td><button class="del" data-id="${result.data[i].StudentNo}">删除</button></td>
+                            </tr>`)
+            }
+        }else{
+            alert(result.message);
+        }
+    }
+</script>
+</body>
+</html>

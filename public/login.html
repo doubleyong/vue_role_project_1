@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>登录</h1>
+<form id="form1">
+    用户名: <input type="text" name="txtUser" id="txtUser"/>
+    密码: <input type="password" name="txtPwd" id="txtPwd"/>
+    <button type="button" id="btnLogin">登录</button>
+</form>
+<script src="js/jquery.js"></script>
+<script type="text/javascript">
+    $("#btnLogin").click(()=>{
+        var user = $("#txtUser").val().trim();
+        var pwd = $("#txtPwd").val().trim();;
+
+        if(user.length==0){
+            alert("用户名不能为空");
+        }else if (pwd.length==0){
+            alert("密码不能为空");
+        }else{
+            //用户 名与密码传到服务器，服务器进行验证，返回验证的结果
+            // ajax :客户端向服务器发起一个请求
+            // 1. 创建XHR对象  //2. 设置请求的open方法
+            // 3. 事件回调   //4. send进行发送
+            // post 数据在send中发送，get的数据url用?连接
+            // post添加请求头
+            // Content-Type,""
+            let param =$("#form1").serialize();
+            $.ajax({
+                type:"post",
+                url:"/user/login.do",
+                data:param,
+                success:function (data) {
+                    console.log(typeof data);
+                    console.log(data);
+                    if(data=="ok"){
+                        location.href = "/DataTable.html";
+                    }else{
+                        alert(data);
+                    }
+                }
+            })
+
+        }
+    })
+</script>
+</body>
+</html>
